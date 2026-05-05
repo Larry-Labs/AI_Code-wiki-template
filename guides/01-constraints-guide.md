@@ -193,3 +193,111 @@
 ### 遵循标准
 
 - [ ] OpenGL 4.5 / Vulkan 1.3
+
+---
+
+## 桌面应用
+
+### 性能
+
+- 启动时间：< 2s
+- 内存占用：< 200MB
+- 包大小：< 100MB
+
+### 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| 操作系统 | Windows 10+, macOS 12+, Ubuntu 20+ |
+| 最低配置 | 4GB RAM |
+| 分发方式 | 直接下载 / App Store / Homebrew |
+
+### 遵循标准
+
+- [ ] 各平台 UI 规范（HIG / Material / Fluent）
+
+---
+
+## 编译器/语言工具
+
+### 性能
+
+- 编译速度：< 1s（1000 行源码）
+- 内存占用：< 500MB
+
+### 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| 操作系统 | Linux, macOS, Windows |
+| 分发方式 | npm / pip / cargo / brew |
+
+### 遵循标准
+
+- [ ] 语言规范版本（如 ECMAScript 2024 / C17）
+
+---
+
+## 库/SDK
+
+### 性能
+
+- 包大小：< 50KB（gzipped）
+- 无运行时开销（零成本抽象优先）
+
+### 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| 操作系统 | 跨平台 |
+| 分发方式 | npm / pip / cargo / Maven Central |
+
+### 遵循标准
+
+- [ ] SemVer（语义化版本）
+- [ ] 向后兼容性承诺
+
+---
+
+## 基础设施
+
+### 性能
+
+- 部署时间：< 10min
+- 回滚时间：< 5min
+
+### 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| 目标平台 | AWS / GCP / Azure |
+| 工具版本 | Terraform >= 1.7, K8s >= 1.28 |
+| 分发方式 | Terraform Registry / Helm Chart |
+
+### 遵循标准
+
+- [ ] Well-Architected Framework
+- [ ] CIS Benchmarks
+
+---
+
+## 微服务
+
+### 性能
+
+- 服务间延迟：< 50ms（P99）
+- 可用性：99.95%
+
+### 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| 编排平台 | Kubernetes |
+| 服务网格 | Istio / Linkerd（可选） |
+| 消息队列 | Kafka / RabbitMQ |
+| 分发方式 | Docker + Helm |
+
+### 遵循标准
+
+- [ ] 12-Factor App
+- [ ] OpenTelemetry（可观测性）

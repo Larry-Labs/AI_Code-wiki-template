@@ -650,6 +650,278 @@ configs/
 
 ---
 
+## 桌面应用 (Electron/Tauri) — 重建顺序
+
+### 前置条件
+
+- [ ] 安装 Node.js 18+（Electron）或 Rust（Tauri）
+- [ ] 安装对应框架 CLI
+
+### 第一阶段：项目骨架
+
+#### Step 1：初始化项目
+
+```bash
+# Electron
+npx create-electron-app my-desktop --template typescript
+
+# Tauri
+npm create tauri-app@latest my-desktop -- --template react-ts
+```
+
+**验证**：应用窗口能启动
+
+#### Step 2：搭建架构
+
+```
+src/
+├── main/           # 主进程
+├── renderer/       # 渲染进程
+├── shared/         # 共享类型和工具
+└── preload.ts      # 预加载脚本
+```
+
+**验证**：主进程和渲染进程通信正常（ipcRenderer/ipcMain）
+
+### 第二阶段：核心功能
+
+#### Step 3：实现数据持久化
+
+- 文件：`src/main/database.ts`
+- 内容：SQLite 连接、CRUD 操作
+
+**验证**：数据重启后保留
+
+#### Step 4：实现 UI
+
+- 文件：`src/renderer/App.tsx`
+- 内容：主界面、交互逻辑
+
+**验证**：功能可正常使用
+
+### 第三阶段：发布
+
+#### Step 5：打包
+
+```bash
+# Electron
+npm run make
+
+# Tauri
+npm run tauri build
+```
+
+**验证**：安装包在目标平台可安装运行
+
+---
+
+## 编译器/语言工具 — 重建顺序
+
+### 前置条件
+
+- [ ] 安装 Rust 或对应语言工具链
+- [ ] 理解目标语言规范
+
+### 第一阶段：项目骨架
+
+#### Step 1：初始化项目
+
+```bash
+cargo init my-lang
+```
+
+**验证**：`cargo run` 输出 "Hello, world!"
+
+#### Step 2：创建模块结构
+
+```
+src/
+├── lexer/          # 词法分析
+├── parser/         # 语法分析
+├── ast/            # AST 定义
+├── codegen/        # 代码生成
+└── main.rs         # 入口
+```
+
+### 第二阶段：前端
+
+#### Step 3：实现词法分析器
+
+- 文件：`src/lexer/mod.rs`
+- 内容：Token 定义、词法分析逻辑
+
+**验证**：能正确 tokenize 测试用例
+
+#### Step 4：实现语法分析器
+
+- 文件：`src/parser/mod.rs`
+- 内容：AST 节点、递归下降解析
+
+**验证**：能正确 parse 测试用例，AST 结构正确
+
+### 第三阶段：后端
+
+#### Step 5：实现代码生成
+
+- 文件：`src/codegen/mod.rs`
+- 内容：AST → IR/目标代码
+
+**验证**：生成的代码能正确执行
+
+### 第四阶段：集成
+
+#### Step 6：端到端测试
+
+**验证**：
+- [ ] 编译 hello world 程序
+- [ ] 错误信息友好且准确
+- [ ] 性能指标达标
+
+---
+
+## 基础设施 (Terraform + K8s) — 重建顺序
+
+### 前置条件
+
+- [ ] 安装 Terraform >= 1.7
+- [ ] 安装 kubectl
+- [ ] 配置云厂商凭证
+
+### 第一阶段：基础设施
+
+#### Step 1：定义 Provider
+
+```hcl
+# main.tf
+terraform {
+  required_providers {
+    aws = { source = "hashicorp/aws", version = "~> 5.0" }
+  }
+}
+```
+
+**验证**：`terraform init` 成功
+
+#### Step 2：创建网络
+
+- 文件：`modules/vpc/main.tf`
+- 内容：VPC、子网、路由表
+
+**验证**：`terraform plan` 无错误
+
+### 第二阶段：核心服务
+
+#### Step 3：创建 K8s 集群
+
+- 文件：`modules/eks/main.tf`
+- 内容：EKS 集群、节点组
+
+**验证**：`kubectl get nodes` 显示节点就绪
+
+#### Step 4：创建数据库
+
+- 文件：`modules/rds/main.tf`
+- 内容：RDS 实例、安全组
+
+**验证**：数据库可连接
+
+### 第三阶段：应用部署
+
+#### Step 5：部署 Helm Charts
+
+- 文件：`charts/app/`
+- 内容：Deployment、Service、Ingress
+
+**验证**：应用可通过 Ingress 访问
+
+### 第四阶段：多环境
+
+#### Step 6：配置环境
+
+- 文件：`environments/dev/`, `environments/prod/`
+- 内容：环境变量覆盖
+
+**验证**：
+- [ ] `terraform workspace select dev && terraform apply` 成功
+- [ ] `terraform workspace select prod && terraform apply` 成功
+
+---
+
+## 微服务 — 重建顺序
+
+### 前置条件
+
+- [ ] 安装 Docker + Docker Compose
+- [ ] 安装 Kubernetes（本地用 kind/minikube）
+- [ ] 安装 Helm
+
+### 第一阶段：项目骨架
+
+#### Step 1：初始化 monorepo
+
+```
+services/
+├── user-service/
+├── order-service/
+├── gateway/
+infra/
+├── docker-compose.yaml
+├── k8s/
+```
+
+**验证**：`docker compose up` 所有服务启动
+
+#### Step 2：实现 API 网关
+
+- 文件：`gateway/src/main.ts`
+- 内容：路由转发、认证中间件
+
+**验证**：网关能转发请求到后端服务
+
+### 第二阶段：核心服务
+
+#### Step 3：实现用户服务
+
+- 文件：`services/user-service/`
+- 内容：CRUD、JWT 认证
+
+**验证**：注册、登录接口正常
+
+#### Step 4：实现订单服务
+
+- 文件：`services/order-service/`
+- 内容：订单 CRUD、状态机
+
+**验证**：创建订单、查询订单正常
+
+### 第三阶段：服务间通信
+
+#### Step 5：实现消息队列
+
+- 内容：Kafka/RabbitMQ 事件发布和消费
+
+**验证**：订单创建后用户服务收到事件
+
+#### Step 6：实现分布式追踪
+
+- 内容：OpenTelemetry 集成
+
+**验证**：能在 Jaeger UI 看到完整调用链
+
+### 第四阶段：部署
+
+#### Step 7：K8s 部署
+
+- 文件：`infra/k8s/`
+- 内容：Deployment、Service、ConfigMap
+
+**验证**：
+- [ ] 所有 Pod Running
+- [ ] 服务间通信正常
+- [ ] 端到端请求成功
+
+---
+
 ## 回顾（通用模板）
 
 重建完成后，记录实际遇到的问题和调整：

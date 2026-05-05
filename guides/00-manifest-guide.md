@@ -409,3 +409,159 @@ directories:
   gateway/: "API 网关"
   infra/: "基础设施配置"
 ```
+
+---
+
+## 桌面应用 (Electron/Tauri)
+
+```yaml
+name: my-desktop
+description: "Markdown 编辑器，支持实时预览和插件"
+
+tech_stack:
+  language: typescript
+  runtime: electron@28
+  framework: electron
+  database: sqlite
+  orm: none
+  style: tailwindcss
+
+dependencies:
+  critical:
+    - name: electron
+      version: "^28.0"
+      purpose: "桌面应用框架"
+    - name: better-sqlite3
+      version: "^11.0"
+      purpose: "本地数据库"
+  optional:
+    - name: electron-updater
+      version: "^6.0"
+      purpose: "自动更新"
+
+entry_points:
+  main: src/main/index.ts
+  config: src/main/config.ts
+
+directories:
+  src/main/: "主进程"
+  src/renderer/: "渲染进程"
+  src/shared/: "共享类型"
+```
+
+---
+
+## 编译器/语言工具
+
+```yaml
+name: my-lang
+description: "玩具语言编译器，支持函数和模式匹配"
+
+tech_stack:
+  language: rust
+  runtime: 无
+  framework: 无
+  database: none
+  orm: none
+  style: none
+
+dependencies:
+  critical:
+    - name: logos
+      version: "^0.14"
+      purpose: "词法分析"
+    - name: inkwell
+      version: "^0.5"
+      purpose: "LLVM IR 生成"
+  optional:
+    - name: clap
+      version: "^4.5"
+      purpose: "CLI 参数解析"
+
+entry_points:
+  main: src/main.rs
+  config: Cargo.toml
+
+directories:
+  src/lexer/: "词法分析"
+  src/parser/: "语法分析"
+  src/ast/: "AST 定义"
+  src/codegen/: "代码生成"
+  tests/: "测试用例"
+```
+
+---
+
+## 库/SDK (npm)
+
+```yaml
+name: my-sdk
+description: "类型安全的 HTTP 客户端 SDK"
+
+tech_stack:
+  language: typescript
+  runtime: node@18
+  framework: none
+  database: none
+  orm: none
+  style: none
+
+dependencies:
+  critical:
+    - name: axios
+      version: "^1.7"
+      purpose: "HTTP 请求"
+  optional:
+    - name: zod
+      version: "^3.23"
+      purpose: "运行时类型校验"
+
+entry_points:
+  main: src/index.ts
+  config: tsconfig.json
+
+directories:
+  src/: "源代码"
+  src/types/: "类型定义"
+  src/client/: "客户端实现"
+  tests/: "测试"
+```
+
+---
+
+## 基础设施 (Terraform + K8s)
+
+```yaml
+name: my-infra
+description: "AWS EKS 集群 + RDS + Redis 基础设施"
+
+tech_stack:
+  language: hcl
+  runtime: 无
+  framework: terraform
+  database: none
+  orm: none
+  style: none
+
+dependencies:
+  critical:
+    - name: hashicorp/aws
+      version: "~> 5.0"
+      purpose: "AWS Provider"
+    - name: hashicorp/kubernetes
+      version: "~> 2.27"
+      purpose: "K8s Provider"
+  optional:
+    - name: hashicorp/helm
+      version: "~> 2.12"
+      purpose: "Helm Chart 部署"
+
+entry_points:
+  main: main.tf
+  config: variables.tf
+
+directories:
+  modules/: "自定义模块"
+  environments/: "环境配置 (dev/staging/prod)"
+  charts/: "Helm Charts"
+```
