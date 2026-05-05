@@ -35,7 +35,8 @@ ai-code-wiki-template/
 │   ├── 07-conventions.md   # 代码约定
 │   ├── 08-file-specs/      # 文件规格
 │   │   └── _example.md     # 规格模板
-│   └── 09-rebuild.md       # 重建指南
+│   ├── 09-rebuild.md       # 重建指南
+│   └── 10-human-guide.md   # 人类阅读指南
 ├── guides/                 # 填写指南（按需查阅）
 │   ├── 00-manifest-guide.md
 │   ├── 01-constraints-guide.md
@@ -46,7 +47,8 @@ ai-code-wiki-template/
 │   ├── 06-config-guide.md
 │   ├── 07-conventions-guide.md
 │   ├── 08-file-specs-guide.md
-│   └── 09-rebuild-guide.md
+│   ├── 09-rebuild-guide.md
+│   └── 10-human-guide-guide.md
 └── .gitignore
 ```
 
@@ -145,6 +147,7 @@ cp -r template/ /path/to/your/project/ai-code-wiki/
 | 8 | `09-rebuild.md` | 所有细节确定后，才能写出正确的重建顺序 | `guides/09-rebuild-guide.md` |
 | 9 | `06-config.md` | 构建和部署细节，优先级最低 | `guides/06-config-guide.md` |
 | 10 | `07-conventions.md` | 约定往往在代码写完后才明确 | `guides/07-conventions-guide.md` |
+| 11 | `10-human-guide.md` | 给人类看的入门指南，可最后补充 | `guides/10-human-guide-guide.md` |
 
 **核心投入在 `08-file-specs/`**，这是工作量最大、价值最高的部分。其他文件可以从 file-specs 中提炼。
 

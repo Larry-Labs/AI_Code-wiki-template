@@ -12,7 +12,7 @@ Code Wiki 分为两层：
 
 | 层 | 用途 | 位置 |
 |----|------|------|
-| 模板层 | 项目实际填写的文档 | `00-manifest.yaml` ~ `09-rebuild.md` + `08-file-specs/` |
+| 模板层 | 项目实际填写的文档 | `00-manifest.yaml` ~ `10-human-guide.md` + `08-file-specs/` |
 | 指南层 | 各项目类型的填写示例（参考用） | `guides/` 目录 |
 
 **指南层仅用于参考**，不直接用于代码重建。重建时只读模板层文件。
@@ -97,3 +97,4 @@ Code Wiki 分为两层：
 | `07-conventions.md` | 代码风格、命名、错误处理 |
 | `08-file-specs/` | 每个文件的具体实现 |
 | `09-rebuild.md` | 提交顺序、验证步骤 |
+| `10-human-guide.md` | 人类阅读指南（给开发者看，不参与重建） |
