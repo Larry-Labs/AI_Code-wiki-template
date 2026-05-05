@@ -23,7 +23,7 @@ AI Code Wiki 给 AI 看，**必须无歧义、无遗漏、自包含。**
 ```
 ai-code-wiki-template/
 ├── README.md               # 本文件
-├── CLAUDE.md               # Agent 指令
+├── AGENT.md                # Agent 指令
 ├── template/               # 纯结构模板（复制到项目中）
 │   ├── 00-manifest.yaml    # 项目身份
 │   ├── 01-constraints.md   # 约束条件
@@ -115,7 +115,7 @@ cp -r template/ /path/to/your/project/ai-code-wiki/
 
 ## Agent 指南
 
-`CLAUDE.md` 是给 AI Agent 的指令文件。如果你用 Claude Code / Cursor / Codex 等工具，把 `CLAUDE.md` 放在项目根目录，Agent 会自动读取并按照规范工作。
+`AGENT.md` 是给 AI Agent 的指令文件。如果你用 Claude Code / Cursor / Copilot / Codex 等工具，把 `AGENT.md` 放在项目根目录，Agent 会自动读取并按照规范工作。
 
 ## 灵感来源
 
