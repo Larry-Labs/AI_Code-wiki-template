@@ -84,16 +84,45 @@ ai-code-wiki-template/
 
 ## 使用方式
 
-### 快速开始
+### 第一步：代码 → Wiki
+
+把现有代码转成 AI Code Wiki。在项目根目录下对 AI 说：
+
+```
+把 ai-code-wiki-template/template/ 复制到当前项目的 ai-code-wiki/，然后分析当前项目代码，逐个填写 ai-code-wiki/ 下的文档。
+
+要求：
+1. 按 00 → 01 → 02 → 08-file-specs → 03 → 04 → 05 → 09 → 06 → 07 的顺序生成
+2. 函数签名必须包含完整类型信息
+3. 写出 AI 重建时会踩的坑，不要贴源码
+4. 08-file-specs 只覆盖核心文件
+5. 参照 guides/ 中同类型项目的示例格式
+```
+
+### 第二步：Wiki → Code
+
+拿到 Wiki 后，让 AI 重建代码。在项目根目录下对 AI 说：
+
+```
+读 ai-code-wiki/ 目录下的所有文档，按照 AGENT.md 的工作流程，从 09-rebuild.md 的 Step 1 开始，逐步重建出完整代码到 /path/to/new-project/。
+
+规则：
+1. 只读 ai-code-wiki/ 下的文档，不读源码
+2. 严格按 09-rebuild.md 的 Step 顺序执行
+3. 每个 Step：读对应的 file-spec → 读接口和数据定义 → 实现代码 → 跑验证检查点
+4. 文档没写的东西不要猜，标 TODO
+5. 代码风格必须符合 07-conventions.md
+```
+
+### 手动填写
+
+如果不用 AI 生成，也可以手动填写：
 
 ```bash
 # 1. 复制模板到你的项目
 cp -r template/ /path/to/your/project/ai-code-wiki/
 
-# 2. 按推荐顺序填写（见下方）
-
-# 3. 参照 guides/ 中的示例
-#    例如填写 constraints 时，参考 guides/01-constraints-guide.md
+# 2. 参照 guides/ 中的示例，按推荐顺序填写
 ```
 
 ### 推荐填写顺序
@@ -115,7 +144,7 @@ cp -r template/ /path/to/your/project/ai-code-wiki/
 
 ## Agent 指南
 
-`AGENT.md` 是给 AI Agent 的指令文件。如果你用 Claude Code / Cursor / Copilot / Codex 等工具，把 `AGENT.md` 放在项目根目录，Agent 会自动读取并按照规范工作。
+`AGENT.md` 是给 AI Agent 的指令文件。把 `AGENT.md` 放在项目根目录，Claude Code / Cursor / Copilot / Codex 等工具会自动读取并按照规范工作。重建代码时，AI 会遵循里面的规则（不猜测、签名精确、边界情况必须处理、验证必须通过）。
 
 ## 灵感来源
 
