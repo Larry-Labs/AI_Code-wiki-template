@@ -104,6 +104,81 @@ uint8_t SHT31_CRC8(const uint8_t *data, uint8_t len);
 
 ---
 
+## 嵌入式 — AUTOSAR 文件规格示例
+
+### `src/swc/DiagManager/DiagManager.c`（手写 SWC）
+
+#### 职责
+
+诊断管理 SWC：处理 UDS 诊断请求，管理诊断会话状态，协调 DEM 事件上报。
+
+#### 导出
+
+```c
+// RTE 提供的生命周期接口（由 EcuM 调用）
+void DiagManager_Init(void);
+void DiagManager_MainFunction(void);  // 周期调用，10ms
+
+// SWC 内部函数（不对外暴露，仅文件内使用）
+static void HandleReadDID(uint16 did, uint8 *resp, uint16 *respLen);
+static void HandleWriteDID(uint16 did, const uint8 *data, uint16 dataLen);
+static void HandleRoutineControl(uint16 routineId, uint8 subFunc, const uint8 *req, uint8 *resp);
+```
+
+#### 依赖
+
+- `Rte_Read_RPort_DiagRequest_DiagRequest()` — 读取诊断请求（来自 DCM）
+- `Rte_Write_PPort_DiagResponse_DiagResponse()` — 写入诊断响应（到 DCM）
+- `Dem_SetEventStatus()` — 上报 DEM 事件
+- `NvM_WriteBlock()` — 写入标定数据到 NVM
+
+#### 关键实现细节
+
+- `MainFunction` 每 10ms 被 RTE 调用一次，检查是否有新的诊断请求
+- ReadDID 处理：DID 0xF180（Boot SW 版本）、0xF187（零件号）、0xF18A（供应商 ID）从 ROM 常量读取
+- WriteDID 处理：写入前校验数据长度和范围，通过后调用 `NvM_WriteBlock` 持久化
+- RoutineControl 0xFF01（刷写前检查）：检查电压 > 9V、车速 = 0、发动机熄火
+- 所有诊断响应必须在 P2 时间（5000ms）内返回，否则 DCM 自动发 NRC 0x78
+
+#### 调用方
+
+- `generated/Rte/Rte_DiagManager.c`（通过 RTE 周期调度）
+
+#### 下游调用
+
+- `generated/Dcm/` — DCM 模块（路由诊断请求）
+- `generated/Dem/` — DEM 模块（事件管理）
+- `generated/NvM/` — NVM 模块（数据持久化）
+
+### `generated/Com/Com_Cfg.h`（生成文件 — 仅供参考）
+
+#### 职责
+
+COM 模块配置头文件，定义所有 CAN 信号的 ID、长度、字节序。由 DaVinci Configurator 自动生成。
+
+#### 导出（生成内容示例）
+
+```c
+// 信号 ID 定义（自动生成，勿修改）
+#define COM_SIG_VehicleSpeed    0u
+#define COM_SIG_EngineRPM       1u
+#define COM_SIG_LightCmd        2u
+#define COM_SIG_LightStatus     3u
+
+// PDU ID 定义
+#define COM_PDU_VehicleInfo     0u
+#define COM_PDU_LightControl    1u
+#define COM_PDU_LightFeedback   2u
+
+// 信号发送/接收函数宏（RTE 内部使用）
+Com_SendSignal(Com_SignalIdType SignalId, const void *SignalDataPtr);
+Com_ReceiveSignal(Com_SignalIdType SignalId, void *SignalDataPtr);
+```
+
+**重要**：此文件每次重新配置后会被覆盖，不要手动编辑。如需修改信号定义，通过 DaVinci Configurator GUI 操作。
+
+---
+
 ## Go — 文件规格示例
 
 ### `internal/service/auth.go`

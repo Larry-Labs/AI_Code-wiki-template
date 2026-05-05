@@ -89,6 +89,74 @@ TIM2 定时器中断，周期 30 秒
 
 ---
 
+## 嵌入式 — AUTOSAR 诊断会话状态机
+
+### 状态定义
+
+```
+┌─────────────┐   0x10 01    ┌─────────────┐
+│   Default   │─────────────▶│  Extended   │
+│   Session   │◀─────────────│  Session    │
+│  (默认会话)  │   0x10 01    │ (扩展会话)   │
+└──────┬──────┘              └──────┬──────┘
+       │                            │
+       │ 0x10 02                    │ 0x10 02
+       ▼                            ▼
+┌─────────────┐              ┌─────────────┐
+│ Programming │              │ Programming │
+│  Session    │◀─────────────│  Session    │
+│ (编程会话)   │   0x10 02    │ (编程会话)   │
+└─────────────┘              └─────────────┘
+```
+
+### 会话切换规则
+
+| 当前会话 | 目标会话 | 条件 | 说明 |
+|----------|----------|------|------|
+| Default → Extended | 0x10 01 | 无 | 无需安全解锁 |
+| Default → Programming | 0x10 02 | 需先 0x27 安全解锁 | S3 超时保护 |
+| Extended → Default | 0x10 01 或 S3 超时 | S3=5000ms | 自动回退 |
+| Programming → Default | 0x10 01 或 P2 超时 | P2=5000ms | 超时复位 |
+
+### 超时机制
+
+- **S3 Server Timer**：扩展会话/编程会话无请求 5s 后自动回退 Default
+- **P2 Server Timer**：单个请求处理超时 5s，超时返回 NRC 0x78（ResponsePending）
+- **P2* Server Timer**：NRC 0x78 后的扩展超时 5s
+
+---
+
+## 嵌入式 — AUTOSAR DEM 事件处理流程
+
+### 触发条件
+
+SWC 检测到故障（如传感器断线、通信超时）
+
+### 执行步骤
+
+1. SWC 调用 `Dem_SetEventStatus(EventId, DEM_EVENT_STATUS_FAILED)`
+2. DEM 记录事件状态（Pending → Confirmed）
+3. 达到 trip 阈值后写入 DTC 到 NVM
+4. 同时记录快照数据（环境数据：车速、电压、温度等）
+5. 通过 `Dem_GetDTCStatusByte()` 返回 DTC 状态给诊断仪
+
+### 边界情况
+
+| 场景 | 处理方式 |
+|------|---------|
+| 同一 DTC 重复上报 | 更新 Occurrence Counter，不重复写入 NVM |
+| DTC 达到老化阈值 | 自动清除（Aging Counter 递增） |
+| NVM 写入失败 | 保持内存中的 DTC 状态，下次写入重试 |
+| 快照数据缓冲区满 | 丢弃最早的快照记录 |
+
+### 涉及文件
+
+- `src/swc/DiagManager/` — 诊断管理 SWC
+- `generated/Dem/` — DEM 配置生成代码
+- `generated/NvM/` — NVM 块配置
+
+---
+
 ## CLI 工具 — 命令执行流程
 
 ### 触发条件
@@ -298,3 +366,11 @@ Airflow DAG 调度（每日 UTC 02:00）
 ## 嵌入式 — 业务规则示例
 
 - 传感器数据超过阈值（temp > 60°C）立即上报，不等定时周期
+
+### 嵌入式 — AUTOSAR 业务规则示例
+
+- 车速 > 5 km/h 时禁止进入 Programming Session（安全保护）
+- 发动机运行时禁止执行 RoutineControl 刷写检查
+- DTC 的 trip 阈值为 1 次（Confirmed），aging 阈值为 40 次（自动清除）
+- NVM 写入失败时重试 3 次，仍失败则记录 DEM 事件
+- 安全访问（0x27）种子-密钥算法：seed = random, key = seed XOR 0xA5A5 + 0x1234

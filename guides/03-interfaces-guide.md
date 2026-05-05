@@ -270,6 +270,65 @@ class UserRepository(ABC):
 
 ---
 
+## 嵌入式 — AUTOSAR CAN 信号矩阵
+
+| 信号名 | CAN ID | 周期 | 方向 | 长度 | 说明 |
+|--------|--------|------|------|------|------|
+| `VehicleSpeed` | 0x1A0 | 10ms | 接收 | 16bit | 车速信号，0.01 km/bit |
+| `EngineRPM` | 0x1A0 | 10ms | 接收 | 16bit | 发动机转速，0.25 rpm/bit |
+| `LightCmd` | 0x2B0 | 100ms | 接收 | 8bit | 灯光控制命令 |
+| `DiagRequest` | 0x7E0 | 事件型 | 接收 | 64bit | UDS 诊断请求（CAN-FD） |
+| `DiagResponse` | 0x7E8 | 事件型 | 发送 | 64bit | UDS 诊断响应（CAN-FD） |
+| `LightStatus` | 0x3C0 | 100ms | 发送 | 8bit | 灯光状态反馈 |
+| `DTC_Status` | 0x3C1 | 1000ms | 发送 | 16bit | DTC 状态字节 |
+
+---
+
+## 嵌入式 — AUTOSAR UDS 诊断服务
+
+| 服务 ID | 服务名 | 用途 | 处理模块 |
+|---------|--------|------|----------|
+| 0x10 | DiagnosticSessionControl | 切换诊断会话（Default/Extended/Programming） | DCM |
+| 0x22 | ReadDataByIdentifier | 读取 DID（软件版本、硬件号等） | DCM + SWC |
+| 0x2E | WriteDataByIdentifier | 写入 DID（标定参数、配置数据） | DCM + NVM |
+| 0x27 | SecurityAccess | 安全解锁（种子-密钥算法） | DCM |
+| 0x31 | RoutineControl | 执行例程（刷写检查、自检） | DCM + SWC |
+| 0x14 | ClearDiagnosticInformation | 清除 DTC | DEM |
+| 0x19 | ReadDTCInformation | 读取 DTC 及快照数据 | DEM |
+| 0x28 | CommunicationControl | 控制通信收发 | COM |
+
+---
+
+## 嵌入式 — AUTOSAR RTE Sender-Receiver 接口
+
+```c
+/* RTE 提供的 SWC 间通信接口（自动生成，勿手改） */
+
+// SensorAcq SWC → LightControl SWC：车速信号
+Std_ReturnType Rte_Read_RPort_VehicleSpeed_VehicleSpeed(uint16 *data);
+
+// LightControl SWC → COM：灯光状态反馈
+Std_ReturnType Rte_Write_PPort_LightStatus_LightStatus(uint8 data);
+
+// DiagManager SWC 读取 DCM 提供的诊断请求
+Std_ReturnType Rte_Read_RPort_DiagRequest_DiagRequest(DiagRequestType *data);
+
+// DiagManager SWC 写入诊断响应到 DCM
+Std_ReturnType Rte_Write_PPort_DiagResponse_DiagResponse(const DiagResponseType *data);
+
+// NVM 块读写接口
+Std_ReturnType Rte_Call_RPort_NvmBlock_Read(NvmBlockType *data);
+Std_ReturnType Rte_Call_RPort_NvmBlock_Write(const NvmBlockType *data);
+```
+
+**RTE 接口关键规则**：
+- 所有 RTE 接口由配置工具根据 ARXML 自动生成
+- SWC 只能调用 RTE API，不能直接访问 BSW 或 MCAL
+- Sender-Receiver 是异步的（读取上次缓存值），Client-Server 是同步的
+- 接口命名格式：`Rte_Read/Write_RPort/PPort_{SWC名}_{信号名}`
+
+---
+
 ## 游戏 — 事件定义
 
 | 事件名 | 触发时机 | 消费者 | 数据 |

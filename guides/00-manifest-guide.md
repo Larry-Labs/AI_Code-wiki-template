@@ -171,6 +171,48 @@ directories:
   Middlewares/: "RTOS 和协议栈"
 ```
 
+### 嵌入式 — AUTOSAR Classic Platform
+
+```yaml
+name: my-autosar-ecu
+description: "车身控制器 ECU，基于 AUTOSAR Classic Platform"
+
+tech_stack:
+  language: c
+  runtime: autosar-classic
+  framework: autosar-bsw
+  database: nvm
+  orm: none
+  style: misra-c-2012
+
+dependencies:
+  critical:
+    - name: AUTOSAR BSW
+      version: "4.4"
+      purpose: "基础软件栈（COM, NM, DCM, DEM, NVM 等）"
+    - name: MCAL
+      version: "v3.2"
+      purpose: "微控制器抽象层（CAN, SPI, ADC, DIO, PWM 驱动）"
+  optional:
+    - name: Vector DaVinci Configurator
+      version: "v4.0"
+      purpose: "BSW 模块配置和代码生成"
+    - name: EB tresos Studio
+      version: "v2024"
+      purpose: "MCAL 配置和代码生成（Elektrobit 方案）"
+
+entry_points:
+  main: src/EcuM/EcuM_Main.c
+  config: config/ECU_Configuration.arxml
+
+directories:
+  src/: "应用层 SWC 代码（手写）"
+  generated/: "配置工具生成的代码（不要手动修改）"
+  config/: "ARXML 配置文件"
+  bsw/: "BSW 模块源码（供应商提供）"
+  mcal/: "MCAL 驱动（芯片厂商提供）"
+```
+
 ---
 
 ## iOS 应用

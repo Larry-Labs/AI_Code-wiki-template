@@ -93,6 +93,35 @@
 - [ ] IEEE 802.15.4 (无线协议)
 - [ ] MISRA C:2012 (编码规范)
 
+### 嵌入式 — AUTOSAR Classic Platform
+
+#### 硬件约束
+
+| 项目 | 规格 |
+|------|------|
+| MCU | Infineon TC397 / NXP S32K344 |
+| Flash | 4MB（BSW 栈 ~500KB，应用 ~1MB，OTA 双分区） |
+| RAM | 512KB（BSW ~64KB，应用 ~128KB） |
+| CAN 通道 | 3x CAN-FD + 1x LIN |
+| 功耗预算 | < 5mA 正常运行，< 100μA 休眠 |
+| 工作温度 | -40°C ~ 125°C（车规 Grade 0） |
+
+#### 性能
+
+- CAN 报文周期：10ms（底盘域），100ms（车身域）
+- 诊断响应时间：< 50ms（UDS 0x22 读 DID）
+- NM 网络唤醒时间：< 100ms
+- Bootloader 刷写时间：< 5 分钟（完整 ECU）
+
+#### 遵循标准
+
+- [ ] ISO 26262 (功能安全，ASIL-B/D)
+- [ ] ISO 14229 (UDS 统一诊断服务)
+- [ ] ISO 11898 (CAN 总线协议)
+- [ ] AUTOSAR Classic Platform R22-11
+- [ ] MISRA C:2012 (编码规范，含 Amendment 2)
+- [ ] SAE J1939 (商用车通信协议，如适用)
+
 ---
 
 ## iOS 应用

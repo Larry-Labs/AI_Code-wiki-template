@@ -224,6 +224,30 @@ terraform destroy
 
 ---
 
+## 嵌入式 — AUTOSAR 构建命令
+
+```bash
+# 使用 Vector DaVinci Configurator 生成 BSW 配置代码
+# GUI 操作：打开 .dpa 工程 → Generate → 输出到 generated/ 目录
+# 命令行（CI 用）：
+DaVinciConfiguratorCLI -project config/MyECU.dpa -generate
+
+# 使用 EB tresos Studio 生成 MCAL 配置代码
+# GUI 操作：打开 .epc 工程 → Generate → 输出到 mcal/generated/ 目录
+# 命令行（CI 用）：
+tresos_cmd -project config/MyECU.epc generate
+
+# 编译（生成代码 + 手写代码 + BSW 库）
+make all
+
+# 烧录（通过调试器或 UDS 刷写）
+make flash
+# 或通过 UDS 刷写（需要 Programming Session）：
+# python tools/uds_flash.py --target 192.168.1.100 build/firmware.hex
+```
+
+---
+
 ## Web 后端 — 运行时依赖
 
 | 依赖 | 版本 | 用途 | 可替代方案 |
@@ -243,6 +267,16 @@ terraform destroy
 | STM32 HAL | v1.14 | 硬件抽象层 | ST 官方 |
 | FreeRTOS | v10.5 | 实时操作系统 | 官方 |
 | SX1276 Driver | v2.1 | LoRa 驱动 | 自研/社区 |
+
+### 嵌入式 — AUTOSAR 依赖
+
+| 依赖 | 版本 | 用途 | 来源 |
+|------|------|------|------|
+| AUTOSAR BSW Stack | R22-11 | 基础软件栈 | Vector / EB 提供 |
+| MCAL (TC397) | v3.2 | 微控制器抽象层 | Infineon 提供 |
+| Vector DaVinci Configurator | v4.0 | BSW 配置工具 | 商业许可 |
+| EB tresos Studio | v2024 | MCAL 配置工具 | 商业许可（可选） |
+| AUTOSAR ARXML Schema | R22-11 | 配置文件格式 | AUTOSAR 标准 |
 
 ---
 

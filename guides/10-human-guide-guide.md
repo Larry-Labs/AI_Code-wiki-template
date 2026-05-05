@@ -339,6 +339,224 @@ FreeRTOS 队列更通用但有额外的内存拷贝和锁开销。
 
 ---
 
+## 嵌入式 — AUTOSAR Classic Platform
+
+### 项目概述
+
+这是一个车身控制器 ECU（Body Control Module），基于 AUTOSAR Classic Platform 开发。
+负责车灯控制、车窗控制、雨刮控制等车身功能，通过 CAN 总线与整车网络通信。
+给 OEM（整车厂）提供标准化的 ECU 软件，满足车规级功能安全和诊断需求。
+
+### 技术路线
+
+用 AUTOSAR Classic Platform 做软件架构，因为是行业标准，OEM 强制要求。
+用 Vector DaVinci 做 BSW 配置，因为是主流工具链，OEM 认可。
+用 Infineon TC397 做主控，因为性能充足、MCAL 支持成熟。
+用 CAN-FD 做通信，因为带宽高、兼容经典 CAN。
+
+### 架构全景
+
+#### 系统边界（Context）
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  OEM 诊断仪  │     │  整车 CAN   │     │  车身传感器  │
+│  (UDS)      │     │  网络       │     │  (车门/车窗) │
+└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────────────────────────────────────────────────┐
+│                    BCM ECU (本系统)                      │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐           │
+│  │ DiagMgr   │  │ LightCtrl │  │ WindowCtrl│           │
+│  │  SWC      │  │  SWC      │  │  SWC      │           │
+│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘           │
+│        └──────────────┼──────────────┘                  │
+│                       ▼                                 │
+│              ┌────────────────┐                         │
+│              │      RTE       │                         │
+│              └───────┬────────┘                         │
+│              ┌───────┴────────┐                         │
+│              │   BSW (COM/DCM │                         │
+│              │    DEM/NVM)    │                         │
+│              └───────┬────────┘                         │
+│              ┌───────┴────────┐                         │
+│              │      MCAL      │                         │
+│              └────────────────┘                         │
+└─────────────────────────────────────────────────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  CAN 收发器  │     │  车灯驱动    │     │  车窗电机    │
+└─────────────┘     └─────────────┘     └─────────────┘
+```
+
+#### 服务/模块划分（Container）
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                Application SWCs                         │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐           │
+│  │ DiagMgr   │  │ LightCtrl │  │ WindowCtrl│           │
+│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘           │
+│        └──────────────┼──────────────┘                  │
+│                       ▼                                 │
+│              ┌────────────────┐                         │
+│              │      RTE       │  (自动生成)              │
+│              └───────┬────────┘                         │
+├──────────────────────┼──────────────────────────────────┤
+│                 BSW Services                             │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐                  │
+│  │ COM  │ │ DCM  │ │ DEM  │ │ NVM  │                  │
+│  └──────┘ └──────┘ └──────┘ └──────┘                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 核心数据流
+
+#### 场景 1：CAN 信号驱动车灯控制
+
+```
+整车 CAN 总线
+  → COM 模块        (接收 LightCmd 信号，0x2B0)
+  → RTE             (信号路由到 LightControl SWC)
+  → LightControl    (解析命令，检查安全条件)
+  → DIO MCAL        (输出高低电平驱动继电器)
+  → 车灯亮/灭
+```
+
+#### 场景 2：UDS 诊断读取 DTC
+
+```
+诊断仪发送 0x19 02 FF（读取所有 Confirmed DTC）
+  → CAN 收发器      (物理层接收)
+  → CAN MCAL        (接收 CAN 帧)
+  → DCM             (解析 UDS 请求，路由到 DEM)
+  → DEM             (查询 DTC 列表和状态)
+  → DCM             (组装 UDS 响应)
+  → COM             (发送 CAN 响应帧 0x7E8)
+  → 诊断仪显示 DTC 列表
+```
+
+### 推荐阅读顺序
+
+#### 快速理解（30 分钟）
+
+1. 本文件 — 建立全貌
+2. `00-manifest.yaml` — AUTOSAR 工具链和技术栈
+3. `02-architecture.md` — BSW 分层架构
+4. `05-logic.md` — 诊断会话状态机
+
+#### 深入理解（2 小时）
+
+5. `03-interfaces.md` — CAN 信号矩阵和 UDS 服务
+6. `04-data.md` — PDU 结构和 NVM 块定义
+7. `08-file-specs/DiagManager.c` — 诊断 SWC 实现细节
+
+#### 开发时查阅
+
+8. `06-config.md` — DaVinci/tresos 配置流程
+9. `07-conventions.md` — AUTOSAR 文件组织（generated vs 手写）
+10. `01-constraints.md` — ASIL 等级和车规要求
+
+### 快速上手
+
+#### 环境准备
+
+- Vector DaVinci Configurator（BSW 配置，商业许可）
+- EB tresos Studio（MCAL 配置，商业许可，可选）
+- Infineon AURIX Development Studio（编译调试）
+- Lauterbach TRACE32 或 iSYSTEM（调试器）
+- CANoe 或 CANalyzer（CAN 总线分析和 UDS 诊断）
+
+#### 启动项目
+
+```bash
+git clone <仓库地址>
+cd my-autosar-ecu
+
+# 1. 用 DaVinci 打开 config/MyECU.dpa，生成 BSW 代码
+# 2. 用 EB tresos 打开 config/MyECU.epc，生成 MCAL 代码
+# 3. 编译
+make all
+
+# 4. 烧录
+make flash
+```
+
+#### 验证
+
+用 CANoe 连接 ECU，发送 CAN 报文 0x2B0（LightCmd=0x01），观察车灯亮起。
+用 UDS 诊断仪发送 0x10 01（切 Default Session），收到正响应 0x50 01。
+
+#### 第一个改动
+
+1. 打开 `src/swc/LightControl/LightControl.c`
+2. 找到灯光延时常量 `#define LIGHT_ON_DELAY_MS 500`
+3. 改成 `1000`（1 秒延时）
+4. 重新编译烧录，观察车灯响应时间变化
+
+### 常见场景
+
+#### 场景：添加新的 CAN 信号
+
+1. 在 DaVinci Configurator 中添加新信号定义（COM 模块）
+2. 配置信号到 PDU 的映射关系
+3. 重新生成 COM 配置代码
+4. 在 SWC 中通过 `Rte_Read/Write` 接口访问信号
+5. 用 CANoe 验证信号收发
+
+#### 场景：添加新的 UDS DID
+
+1. 在 DaVinci Configurator 中添加 DID 定义（DCM 模块）
+2. 配置 DID 的读写权限和数据长度
+3. 在 `DiagManager.c` 中实现 `HandleReadDID` / `HandleWriteDID` 的新分支
+4. 重新生成 DCM 配置代码
+5. 用 UDS 诊断仪验证 0x22/0x2E 服务
+
+#### 场景：排查 DTC 无法清除
+
+1. 用 UDS 诊断仪读取 DTC 状态字节（0x19 02）
+2. 检查 bit 0（testFailed）是否仍为 1 — 故障仍存在则无法清除
+3. 检查 bit 5（testNotCompletedSinceLastClear）— 测试未完成则不响应清除
+4. 查看 `generated/Dem/Dem_Cfg.h` 中的 DTC 配置
+5. 常见问题：NVM 块损坏、快照数据不一致
+
+### 设计决策解读
+
+#### 为什么 SWC 不能直接访问 BSW
+
+AUTOSAR 的核心设计是分层解耦：SWC 只能通过 RTE 访问 BSW，不能绕过 RTE 直接调用 COM/DCM 等模块。
+
+这样做的好处是 SWC 可以在不同 ECU 之间复用（只要 RTE 接口匹配），BSW 可以独立升级（不影响 SWC）。
+
+代价是增加了一层间接调用的开销（RTE 调用 ~1μs），但对 10ms 周期的任务来说可以忽略。
+
+#### 为什么用 DaVinci 而不是手写 BSW 配置
+
+BSW 配置涉及数百个参数的交叉约束（如 CAN ID 不能冲突、NVM 块地址不能重叠），手写极易出错。
+
+DaVinci Configurator 提供参数校验、冲突检测、代码生成一体化流程，虽然工具贵（~50k EUR/年），但节省的调试时间远超成本。
+
+代价是团队必须学习工具使用，且生成的代码可读性差（需要理解 AUTOSAR 规范才能读懂）。
+
+### FAQ
+
+#### Q: AUTOSAR 工具链太贵，有没有开源替代？
+
+没有成熟的开源 AUTOSAR BSW 替代方案。但可以用以下方式降低成本：
+- MCAL 用芯片厂商免费提供的驱动（Infineon/NXP/瑞萨都免费）
+- BSW 用 Vector 或 EB 的评估版（功能受限但够学习用）
+- 参考 AUTOSAR 官方文档理解规范，用自研代码替代部分 BSW 功能
+
+#### Q: 生成代码和手写代码怎么区分？
+
+`generated/` 目录下所有文件都是工具生成的，绝对不要手动修改（每次重新配置会覆盖）。
+`src/swc/` 目录下是手写的应用逻辑。
+区分方法：看文件头注释 — 生成代码通常有 `/* This file is auto-generated */` 标记。
+
+---
+
 ## CLI 工具 (Go)
 
 ### 项目概述

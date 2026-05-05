@@ -147,6 +147,64 @@ config/                 # 板级配置
 └── FreeRTOSConfig.h
 ```
 
+### 嵌入式 — AUTOSAR 文件组织
+
+```
+src/
+├── swc/                    # 应用层 SWC（手写）
+│   ├── DiagManager/
+│   │   ├── DiagManager.c
+│   │   └── DiagManager.h
+│   ├── LightControl/
+│   │   ├── LightControl.c
+│   │   └── LightControl.h
+│   └── SensorAcq/
+│       ├── SensorAcq.c
+│       └── SensorAcq.h
+
+generated/                  # 配置工具生成（不要手动修改）
+├── Rte/                    # RTE 接口代码
+│   ├── Rte.h
+│   ├── Rte_<SWC>.h        # 每个 SWC 的专用头文件
+│   └── Rte.c
+├── Com/                    # COM 信号配置
+│   ├── Com_Cfg.h
+│   └── Com.c
+├── Dcm/                    # DCM 诊断配置
+│   ├── Dcm_Cfg.h
+│   └── Dcm.c
+├── Dem/                    # DEM 事件配置
+│   ├── Dem_Cfg.h
+│   └── Dem.c
+├── NvM/                    # NVM 块配置
+│   ├── NvM_Cfg.h
+│   └── NvM.c
+└── EcuM/                   # ECU 状态管理配置
+    ├── EcuM_Cfg.h
+    └── EcuM.c
+
+bsw/                        # BSW 模块源码（供应商提供，勿修改）
+├── Com/
+├── Dcm/
+├── Dem/
+├── NvM/
+├── EcuM/
+└── CanSM/
+
+mcal/                       # MCAL 驱动（芯片厂商提供）
+├── Can/
+├── Spi/
+├── Adc/
+├── Dio/
+└── generated/              # MCAL 配置生成代码
+```
+
+**文件组织关键规则**：
+- `generated/` 目录下所有文件由工具生成，**绝对不要手动修改**（每次重新生成会覆盖）
+- `src/swc/` 下的文件是手写的应用逻辑
+- BSW 模块版本升级时，整个 `bsw/` 目录替换
+- MCAL 配置通过 EB tresos 或芯片厂商工具生成
+
 ---
 
 ## Go — 文件组织

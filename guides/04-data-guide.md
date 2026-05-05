@@ -187,6 +187,56 @@ CREATE INDEX idx_orders_status ON orders(status);
 
 ---
 
+## 嵌入式 — AUTOSAR 数据结构
+
+### PDU（Protocol Data Unit）结构
+
+```c
+/* AUTOSAR COM 模块使用的 PDU 定义 */
+
+// CAN PDU：最大 8 字节（经典 CAN）或 64 字节（CAN-FD）
+typedef struct {
+    PduIdType id;            // PDU 标识符
+    PduLengthType length;    // 数据长度
+    uint8 SduData[64];       // 数据缓冲区（CAN-FD 最大 64 字节）
+} PduInfoType;
+
+// 信号在 PDU 中的打包方式（大端序，按 bit 偏移）
+// 例：VehicleSpeed 在 0x1A0 的 bit[0..15]，EngineRPM 在 bit[16..31]
+// 由 COM 模块自动打包/解包，应用层只读写信号值
+```
+
+### CAN 帧格式（ISO 11898）
+
+```
+经典 CAN 帧（8 字节）：
+┌──────┬──────┬──────┬──────────┬─────┬──────┐
+│ SOF  │ ID   │ DLC  │ 数据域    │ CRC │ EOF  │
+│ 1bit │ 11bit│ 4bit │ 0-64字节 │15bit│ 7bit │
+└──────┴──────┴──────┴──────────┴─────┴──────┘
+
+CAN-FD 帧（最大 64 字节）：
+- 新增 BRS 位（位速率切换）和 ESI 位（错误状态指示）
+- 数据段可切换到更高波特率（最高 8Mbps）
+```
+
+### NVM 块定义
+
+| 块名 | 大小 | 保持策略 | 写入时机 | 说明 |
+|------|------|----------|----------|------|
+| `NvM_DtcSnapshot` | 256B | 异步写入 | DTC 状态变化时 | DTC 快照数据 |
+| `NvM_CalibrationData` | 1KB | 立即写入 | 0x2E 写 DID 后 | 标定参数 |
+| `NvM_SecurityKey` | 32B | 异步写入 | 安全访问后 | 安全密钥存储 |
+| `NvM_ECUConfig` | 512B | 启动时读取 | 初始化阶段 | ECU 配置数据 |
+
+**NVM 块关键规则**：
+- NVM 块使用 CRC 校验，写入时自动计算，读取时自动验证
+- 启动时 `NvM_ReadAll()` 读取所有块，失败时使用默认值（ROM Block）
+- `NvM_WriteAll()` 在下电前调用，确保数据持久化
+- 单个块写入失败不影响其他块（原子性保证）
+
+---
+
 ## Web 后端 — 数据流
 
 ```

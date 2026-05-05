@@ -181,6 +181,53 @@ src/
 
 ---
 
+## 嵌入式 — AUTOSAR 重建顺序
+
+### 前置条件
+
+- [ ] 安装 Vector DaVinci Configurator 或 EB tresos Studio
+- [ ] 获取 BSW 栈源码（供应商授权）
+- [ ] 获取 MCAL 驱动（芯片厂商提供）
+- [ ] 获取 AUTOSAR ARXML Schema 文件
+- [ ] 准备调试器（Lauterbach / iSYSTEM）
+
+### Phase 1：MCAL 配置与生成
+
+1. 使用 EB tresos 配置 MCAL 模块（CAN、SPI、ADC、DIO、PWM）
+2. 生成 MCAL 初始化代码到 `mcal/generated/`
+3. 验证：MCAL 模块初始化成功，CAN 控制器进入 Normal 模式
+
+### Phase 2：BSW 集成
+
+4. 使用 DaVinci Configurator 配置 BSW 模块（COM、DCM、DEM、NVM、EcuM）
+5. 生成 RTE 和 BSW 配置代码到 `generated/`
+6. 集成 BSW 源码到 `bsw/` 目录
+7. 编译链接，确保零错误
+8. 验证：EcuM 启动流程跑通，COM 模块发送/接收 CAN 报文成功
+
+### Phase 3：SWC 开发
+
+9. 实现 `SensorAcq` SWC — 传感器数据采集
+10. 实现 `LightControl` SWC — 灯光控制逻辑
+11. 实现 `DiagManager` SWC — 诊断请求处理
+12. 验证：SWC 间通过 RTE 通信正常，CAN 信号收发正确
+
+### Phase 4：诊断与标定集成
+
+13. 配置 DCM 诊断服务（0x22/0x2E/0x27/0x31）
+14. 配置 DEM 事件和 DTC 定义
+15. 配置 NVM 块（DTC 快照、标定数据）
+16. 验证：UDS 诊断仪可以读 DID、写 DID、清 DTC
+
+### Phase 5：系统集成与验证
+
+17. 全功能集成测试（CAN 矩阵验证、诊断全流程）
+18. 功能安全测试（ASIL-B/D 故障注入测试）
+19. 耐久测试（连续运行 1000h 无异常）
+20. 验证：通过 OEM 认证测试规范
+
+---
+
 ## CLI 工具（Go）— 重建顺序
 
 ### 前置条件
