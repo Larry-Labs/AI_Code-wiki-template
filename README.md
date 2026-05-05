@@ -13,7 +13,7 @@ AI Code Wiki 给 AI 看，**必须无歧义、无遗漏、自包含。**
 
 | 层 | 目录 | 用途 | 特点 |
 |----|------|------|------|
-| 模板层 | `template/` | 纯结构，零领域示例 | 40-80 行/文件，直接复制填写 |
+| 模板层 | `template/` | 纯结构，零领域示例 | 40-100 行/文件，直接复制填写 |
 | 指南层 | `guides/` | 各项目类型的填写示例 | 按需查阅，不复制到项目中 |
 
 **使用方式**：复制 `template/` 到你的项目，改名为 `ai-code-wiki/`，参照 `guides/` 中的示例填写。
@@ -86,17 +86,23 @@ ai-code-wiki-template/
 
 ### 第一步：代码 → Wiki
 
-把现有代码转成 AI Code Wiki。在项目根目录下对 AI 说：
+前提：先 clone 本模板仓库到本地。
+
+```bash
+git clone https://github.com/Larry-Labs/AI_Code-wiki-template.git
+```
+
+然后在你的项目根目录下对 AI 说：
 
 ```
-把 ai-code-wiki-template/template/ 复制到当前项目的 ai-code-wiki/，然后分析当前项目代码，逐个填写 ai-code-wiki/ 下的文档。
+先读 ai-code-wiki-template/template/ 的结构，然后在当前项目创建 ai-code-wiki/，复制模板文件过去，再分析当前项目代码逐个填写。
 
 要求：
 1. 按 00 → 01 → 02 → 08-file-specs → 03 → 04 → 05 → 09 → 06 → 07 的顺序生成
 2. 函数签名必须包含完整类型信息
 3. 写出 AI 重建时会踩的坑，不要贴源码
 4. 08-file-specs 只覆盖核心文件
-5. 参照 guides/ 中同类型项目的示例格式
+5. 先读 ai-code-wiki-template/guides/ 中对应项目类型的示例，再按示例格式填写
 ```
 
 ### 第二步：Wiki → Code

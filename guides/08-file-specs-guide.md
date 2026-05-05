@@ -44,11 +44,11 @@ class AuthService {
 - 邮件发送是异步的，不阻塞注册返回
 - 刷新 token 时验证旧 token 是否在黑名单中
 
-#### 被调用者
+#### 调用方
 
 - `src/api/auth/routes.ts`
 
-#### 调用
+#### 下游调用
 
 - `src/repositories/user.ts`
 - `src/utils/jwt.ts`
@@ -98,7 +98,7 @@ uint8_t SHT31_CRC8(const uint8_t *data, uint8_t len);
 
 - `stm32l0xx_hal_i2c.h` — I2C HAL 驱动
 
-#### 被调用者
+#### 调用方
 
 - `src/tasks/sensor_task.c`
 
@@ -131,11 +131,11 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, stri
 - JWT 使用 `github.com/golang-jwt/jwt/v5`
 - 错误返回 `*AppError` 类型，包含 HTTP 状态码
 
-#### 被调用者
+#### 调用方
 
 - `internal/handler/auth.go`
 
-#### 调用
+#### 下游调用
 
 - `internal/repository/user.go`
 
@@ -165,11 +165,11 @@ class AuthService:
 - JWT 使用 `python-jose`
 - 异步操作使用 `async/await`
 
-#### 被调用者
+#### 调用方
 
 - `src/api/auth.py`
 
-#### 调用
+#### 下游调用
 
 - `src/repositories/user.py`
 
@@ -201,7 +201,7 @@ class APIClient: APIClientProtocol {
 - JSON 解码使用 `JSONDecoder`，日期格式 `.iso8601`
 - 401 响应触发 token 刷新后重试一次
 
-#### 被调用者
+#### 调用方
 
 - `Sources/Features/Home/HomeViewModel.swift`
 
@@ -217,8 +217,8 @@ class APIClient: APIClientProtocol {
 | 导出 | 函数/类/接口的完整签名（类型必须精确） |
 | 依赖 | 本文件依赖的模块及用途 |
 | 关键实现细节 | AI 会踩坑的点、非直觉行为、协议/硬件约束 |
-| 被调用者 | 调用本文件的其他文件 |
-| 调用 | 本文件调用的其他文件 |
+| 调用方 | 调用本文件的其他文件 |
+| 下游调用 | 本文件调用的其他文件 |
 
 **填写建议**：
 - 只写关键文件，不需要覆盖所有文件
